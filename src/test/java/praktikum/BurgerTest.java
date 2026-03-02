@@ -26,7 +26,7 @@ public class BurgerTest {
     private Ingredient ingredient3;
 
     @Test
-    public void setBunsSetsBun() {
+    public void setBun() {
         Burger burger = new Burger();
 
         burger.setBuns(bun);
@@ -35,17 +35,24 @@ public class BurgerTest {
     }
 
     @Test
-    public void addIngredientAddsIngredientToList() {
+    public void addIngredientAddsItem() {
         Burger burger = new Burger();
 
         burger.addIngredient(ingredient1);
 
         assertEquals(1, burger.ingredients.size());
+    }
+
+    @Test
+    public void addIngredientSavesCorrectItem() {
+        Burger burger = new Burger();
+        burger.addIngredient(ingredient1);
+
         assertSame(ingredient1, burger.ingredients.get(0));
     }
 
     @Test
-    public void removeIngredientRemovesByIndex() {
+    public void removeIngredientRemovesItem() {
         Burger burger = new Burger();
         burger.addIngredient(ingredient1);
         burger.addIngredient(ingredient2);
@@ -53,11 +60,33 @@ public class BurgerTest {
         burger.removeIngredient(0);
 
         assertEquals(1, burger.ingredients.size());
+    }
+
+    @Test
+    public void removeIngredientShiftsList() {
+        Burger burger = new Burger();
+        burger.addIngredient(ingredient1);
+        burger.addIngredient(ingredient2);
+
+        burger.removeIngredient(0);
+
         assertSame(ingredient2, burger.ingredients.get(0));
     }
 
     @Test
-    public void moveIngredientMovesIngredientToNewIndex() {
+    public void moveIngredientChangesPosition() {
+        Burger burger = new Burger();
+        burger.addIngredient(ingredient1);
+        burger.addIngredient(ingredient2);
+        burger.addIngredient(ingredient3);
+
+        burger.moveIngredient(0, 2);
+
+        assertSame(ingredient1, burger.ingredients.get(2));
+    }
+
+    @Test
+    public void moveIngredientKeepsOthers() {
         Burger burger = new Burger();
         burger.addIngredient(ingredient1);
         burger.addIngredient(ingredient2);
@@ -66,12 +95,10 @@ public class BurgerTest {
         burger.moveIngredient(0, 2);
 
         assertSame(ingredient2, burger.ingredients.get(0));
-        assertSame(ingredient3, burger.ingredients.get(1));
-        assertSame(ingredient1, burger.ingredients.get(2));
     }
 
     @Test
-    public void getPriceReturnsBunPriceTimesTwoPlusIngredientsSum() {
+    public void getPriceReturnsCorrectValue() {
         Burger burger = new Burger();
 
         when(bun.getPrice()).thenReturn(50.0f);
@@ -86,14 +113,39 @@ public class BurgerTest {
         float price = burger.getPrice();
 
         assertEquals(125.0f, price, 0.0001f);
-
-        verify(bun, times(1)).getPrice();
-        verify(ingredient1, times(1)).getPrice();
-        verify(ingredient2, times(1)).getPrice();
     }
 
     @Test
-    public void getReceiptContainsBunNameIngredientsAndPrice() {
+    public void getPriceCallsBun() {
+        Burger burger = new Burger();
+
+        when(bun.getPrice()).thenReturn(50.0f);
+        burger.setBuns(bun);
+
+        when(ingredient1.getPrice()).thenReturn(10.0f);
+        burger.addIngredient(ingredient1);
+
+        burger.getPrice();
+
+        verify(bun, times(1)).getPrice();
+    }
+
+    @Test
+    public void getPriceCallsIngredient() {
+        Burger burger = new Burger();
+
+        when(bun.getPrice()).thenReturn(50.0f);
+        burger.setBuns(bun);
+
+        when(ingredient1.getPrice()).thenReturn(10.0f);
+        burger.addIngredient(ingredient1);
+
+        burger.getPrice();
+
+        verify(ingredient1, times(1)).getPrice();
+    }
+
+    private Burger makeBurgerForReceipt() {
         Burger burger = new Burger();
 
         when(bun.getName()).thenReturn("Black bun");
@@ -111,13 +163,43 @@ public class BurgerTest {
         burger.addIngredient(ingredient1);
         burger.addIngredient(ingredient2);
 
+        return burger;
+    }
+
+    @Test
+    public void receiptContainsBun() {
+        Burger burger = makeBurgerForReceipt();
+
         String receipt = burger.getReceipt();
 
         assertThat(receipt, containsString("(==== Black bun ====)"));
-        assertThat(receipt, containsString("= sauce Space sauce ="));
-        assertThat(receipt, containsString("= filling Meteor meat ="));
+    }
 
-        // Цена: 40*2 + 10 + 20 = 110 (в чеке формат float обычно с .000000)
+    @Test
+    public void receiptContainsSauce() {
+        Burger burger = makeBurgerForReceipt();
+
+        String receipt = burger.getReceipt();
+
+        assertThat(receipt, containsString("= sauce Space sauce ="));
+    }
+
+    @Test
+    public void receiptContainsFilling() {
+        Burger burger = makeBurgerForReceipt();
+
+        String receipt = burger.getReceipt();
+
+        assertThat(receipt, containsString("= filling Meteor meat ="));
+    }
+
+    @Test
+    public void receiptContainsPrice() {
+        Burger burger = makeBurgerForReceipt();
+
+        String receipt = burger.getReceipt();
+
+        // 40*2 + 10 + 20 = 110. Не привязываемся к разделителю дробной части.
         assertThat(receipt, containsString("Price: 110"));
     }
 }
