@@ -199,7 +199,7 @@ public class BurgerTest {
 
         String receipt = burger.getReceipt();
 
-        // 40*2 + 10 + 20 = 110. Не привязываемся к разделителю дробной части.
+        // 40*2 + 10 + 20 = 110. Не привязываемся к разделителю дробной части, тк ругался из-за ошибки unmappable character (0x98) for encoding windows-1251
         assertThat(receipt, containsString("Price: 110"));
     }
 }
