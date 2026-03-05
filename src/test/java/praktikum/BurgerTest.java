@@ -17,13 +17,13 @@ public class BurgerTest {
     private Bun bun;
 
     @Mock
-    private Ingredient ingredient1;
+    private Ingredient sauceIngredient;
 
     @Mock
-    private Ingredient ingredient2;
+    private Ingredient fillingIngredient;
 
     @Mock
-    private Ingredient ingredient3;
+    private Ingredient extraIngredient;
 
     @Test
     public void setBun() {
@@ -38,7 +38,7 @@ public class BurgerTest {
     public void addIngredientAddsItem() {
         Burger burger = new Burger();
 
-        burger.addIngredient(ingredient1);
+        burger.addIngredient(sauceIngredient);
 
         assertEquals(1, burger.ingredients.size());
     }
@@ -46,16 +46,16 @@ public class BurgerTest {
     @Test
     public void addIngredientSavesCorrectItem() {
         Burger burger = new Burger();
-        burger.addIngredient(ingredient1);
+        burger.addIngredient(sauceIngredient);
 
-        assertSame(ingredient1, burger.ingredients.get(0));
+        assertSame(sauceIngredient, burger.ingredients.get(0));
     }
 
     @Test
     public void removeIngredientRemovesItem() {
         Burger burger = new Burger();
-        burger.addIngredient(ingredient1);
-        burger.addIngredient(ingredient2);
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
 
         burger.removeIngredient(0);
 
@@ -65,36 +65,36 @@ public class BurgerTest {
     @Test
     public void removeIngredientShiftsList() {
         Burger burger = new Burger();
-        burger.addIngredient(ingredient1);
-        burger.addIngredient(ingredient2);
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
 
         burger.removeIngredient(0);
 
-        assertSame(ingredient2, burger.ingredients.get(0));
+        assertSame(fillingIngredient, burger.ingredients.get(0));
     }
 
     @Test
     public void moveIngredientChangesPosition() {
         Burger burger = new Burger();
-        burger.addIngredient(ingredient1);
-        burger.addIngredient(ingredient2);
-        burger.addIngredient(ingredient3);
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
+        burger.addIngredient(extraIngredient);
 
         burger.moveIngredient(0, 2);
 
-        assertSame(ingredient1, burger.ingredients.get(2));
+        assertSame(sauceIngredient, burger.ingredients.get(2));
     }
 
     @Test
     public void moveIngredientKeepsOthers() {
         Burger burger = new Burger();
-        burger.addIngredient(ingredient1);
-        burger.addIngredient(ingredient2);
-        burger.addIngredient(ingredient3);
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
+        burger.addIngredient(extraIngredient);
 
         burger.moveIngredient(0, 2);
 
-        assertSame(ingredient2, burger.ingredients.get(0));
+        assertSame(fillingIngredient, burger.ingredients.get(0));
     }
 
     @Test
@@ -104,11 +104,11 @@ public class BurgerTest {
         when(bun.getPrice()).thenReturn(50.0f);
         burger.setBuns(bun);
 
-        when(ingredient1.getPrice()).thenReturn(10.0f);
-        when(ingredient2.getPrice()).thenReturn(15.0f);
+        when(sauceIngredient.getPrice()).thenReturn(10.0f);
+        when(fillingIngredient.getPrice()).thenReturn(15.0f);
 
-        burger.addIngredient(ingredient1);
-        burger.addIngredient(ingredient2);
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
 
         float price = burger.getPrice();
 
@@ -122,8 +122,8 @@ public class BurgerTest {
         when(bun.getPrice()).thenReturn(50.0f);
         burger.setBuns(bun);
 
-        when(ingredient1.getPrice()).thenReturn(10.0f);
-        burger.addIngredient(ingredient1);
+        when(sauceIngredient.getPrice()).thenReturn(10.0f);
+        burger.addIngredient(sauceIngredient);
 
         burger.getPrice();
 
@@ -137,12 +137,12 @@ public class BurgerTest {
         when(bun.getPrice()).thenReturn(50.0f);
         burger.setBuns(bun);
 
-        when(ingredient1.getPrice()).thenReturn(10.0f);
-        burger.addIngredient(ingredient1);
+        when(sauceIngredient.getPrice()).thenReturn(10.0f);
+        burger.addIngredient(sauceIngredient);
 
         burger.getPrice();
 
-        verify(ingredient1, times(1)).getPrice();
+        verify(sauceIngredient, times(1)).getPrice();
     }
 
     private Burger makeBurgerForReceipt() {
@@ -152,16 +152,16 @@ public class BurgerTest {
         when(bun.getPrice()).thenReturn(40.0f);
         burger.setBuns(bun);
 
-        when(ingredient1.getType()).thenReturn(IngredientType.SAUCE);
-        when(ingredient1.getName()).thenReturn("Space sauce");
-        when(ingredient1.getPrice()).thenReturn(10.0f);
+        when(sauceIngredient.getType()).thenReturn(IngredientType.SAUCE);
+        when(sauceIngredient.getName()).thenReturn("Space sauce");
+        when(sauceIngredient.getPrice()).thenReturn(10.0f);
 
-        when(ingredient2.getType()).thenReturn(IngredientType.FILLING);
-        when(ingredient2.getName()).thenReturn("Meteor meat");
-        when(ingredient2.getPrice()).thenReturn(20.0f);
+        when(fillingIngredient.getType()).thenReturn(IngredientType.FILLING);
+        when(fillingIngredient.getName()).thenReturn("Meteor meat");
+        when(fillingIngredient.getPrice()).thenReturn(20.0f);
 
-        burger.addIngredient(ingredient1);
-        burger.addIngredient(ingredient2);
+        burger.addIngredient(sauceIngredient);
+        burger.addIngredient(fillingIngredient);
 
         return burger;
     }
@@ -190,7 +190,15 @@ public class BurgerTest {
 
         String receipt = burger.getReceipt();
 
-        assertThat(receipt, containsString("= filling Meteor meat ="));
+        String expectedReceipt =
+                "(==== Black bun ====)\r\n" +
+                        "= sauce Space sauce =\r\n" +
+                        "= filling Meteor meat =\r\n" +
+                        "(==== Black bun ====)\r\n" +
+                        "\r\n" +
+                        "Price: 110,000000\r\n";
+
+        assertEquals(expectedReceipt, receipt);
     }
 
     @Test
